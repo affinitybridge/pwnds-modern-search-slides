@@ -1,0 +1,220 @@
+/* Affinity Bridge palette (ab2022 tokens). */
+:root {
+  --primary-500: #ff584d;
+  --primary-700: #cc463e;
+  --secondary-100: #e9e6de;
+  --secondary-300: #d1c28e;
+  --secondary-500: #a39464;
+  --tertiary-200: #c9cdd5;
+  --tertiary-300: #828ba1;
+  --tertiary-400: #657187;
+  --tertiary-800: #24243a;
+  --tertiary-900: #1b1b2d;
+  --purple-500: #842658;
+  --almond-200: #f1f0ed;
+  --white: #fff;
+
+  --r-background-color: var(--tertiary-900);
+  --r-main-color: var(--almond-200);
+  --r-heading-color: var(--white);
+  --r-link-color: var(--primary-500);
+  --r-link-color-hover: var(--primary-700);
+  --r-selection-background-color: var(--primary-700);
+}
+
+html,
+body,
+.reveal-viewport {
+  background: var(--tertiary-900);
+  background-image: radial-gradient(
+    ellipse at 20% 0%,
+    #2b2b47 0%,
+    var(--tertiary-900) 60%
+  );
+}
+
+.reveal {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 34px;
+  color: var(--r-main-color);
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--r-heading-color);
+}
+
+.reveal h1 { font-size: 2.4em; line-height: 1.05; }
+.reveal h2 { font-size: 1.6em; margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.15em; color: var(--secondary-300); }
+
+.reveal section { text-align: left; }
+.reveal .center { text-align: center; }
+
+/* Accent rule under section headings. */
+.reveal h2::after {
+  content: "";
+  display: block;
+  width: 3.5rem;
+  height: 5px;
+  margin-top: 0.35em;
+  background: var(--primary-500);
+  border-radius: 3px;
+}
+.reveal .no-rule h2::after { display: none; }
+
+.reveal ul { margin-left: 1em; }
+.reveal li { margin-bottom: 0.45em; line-height: 1.35; }
+.reveal li::marker { color: var(--primary-500); }
+
+.reveal strong { color: var(--white); }
+.reveal em { color: var(--secondary-300); font-style: normal; }
+
+.reveal code {
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 0.08em 0.32em;
+  color: var(--secondary-300);
+}
+
+.reveal pre {
+  width: 100%;
+  box-shadow: none;
+  font-size: 0.62em;
+  margin: 0.6em 0;
+}
+
+.reveal pre code {
+  background: #12121f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1em 1.2em;
+  max-height: 62vh;
+  color: var(--almond-200);
+}
+
+/* Title slide. */
+.reveal .title-slide h1 {
+  font-size: 2.1em;
+  background: linear-gradient(100deg, var(--white) 30%, var(--primary-500));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.reveal .kicker {
+  font-size: 0.6em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--primary-500);
+  margin-bottom: 0.8em;
+}
+
+.reveal .byline {
+  color: var(--tertiary-300);
+  font-size: 0.72em;
+  margin-top: 1.4em;
+}
+
+/* Big statement slide. */
+.reveal .statement {
+  font-size: 1.7em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--white);
+  text-align: center;
+}
+.reveal .statement .hl { color: var(--primary-500); }
+
+/* Cards / columns. */
+.reveal .cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 1.1rem;
+  align-items: start;
+}
+.reveal .cols-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+
+.reveal .card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 4px solid var(--primary-500);
+  border-radius: 10px;
+  padding: 0.9em 1em;
+  min-width: 0;
+  font-size: 0.8em;
+}
+.reveal .card h3 { margin: 0 0 0.3em; font-size: 1em; }
+.reveal .card p { margin: 0; color: var(--tertiary-200); }
+.reveal .card.muted { border-left-color: var(--tertiary-400); }
+.reveal .card.gold { border-left-color: var(--secondary-500); }
+
+/* Simple tables. */
+.reveal table { font-size: 0.62em; width: 100%; }
+.reveal table th {
+  color: var(--secondary-300);
+  border-bottom: 2px solid var(--primary-500);
+  text-align: left;
+}
+.reveal table td { border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+
+/* Demo callout. */
+.reveal .demo-badge {
+  display: inline-block;
+  background: var(--primary-500);
+  color: var(--tertiary-900);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.5em;
+  padding: 0.35em 0.9em;
+  border-radius: 999px;
+}
+
+/* Pipeline diagram. */
+.reveal .flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0.6rem;
+  font-size: 0.62em;
+  margin-top: 0.8em;
+}
+.reveal .flow .step {
+  flex: 1 1 0;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.8em 0.6em;
+  text-align: center;
+}
+.reveal .flow .step b { display: block; color: var(--white); margin-bottom: 0.25em; }
+.reveal .flow .step span { color: var(--tertiary-300); font-size: 0.85em; }
+.reveal .flow .arrow {
+  align-self: center;
+  color: var(--primary-500);
+  font-size: 1.4em;
+  flex: 0 0 auto;
+}
+
+.reveal .footnote {
+  color: var(--tertiary-300);
+  font-size: 0.55em;
+  margin-top: 1.2em;
+}
+
+.reveal .reveal-progress { color: var(--primary-500); }
+.reveal .progress { color: var(--primary-500); }
+
+/* Inline code inside cards wraps instead of spilling out. */
+.reveal .card code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 0.85em;
+}

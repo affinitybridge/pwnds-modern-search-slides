@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modern Search in Drupal — PNWDS</title>
+  <link rel="stylesheet" href="vendor/dist/reset.css">
+  <link rel="stylesheet" href="vendor/dist/reveal.css">
+  <link rel="stylesheet" href="vendor/plugin/highlight/monokai.css">
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============ 1. TITLE ============ -->
+<section class="title-slide center no-rule">
+  <p class="kicker">Pacific Northwest Drupal Summit</p>
+  <h1>Modern Search in Drupal</h1>
+  <h3>Search API + Search Web Components</h3>
+  <p class="byline">Mark Labrecque & Mack Hardy &middot; Affinity Bridge</p>
+</section>
+
+<!-- ============ 2. THE PROBLEM ============ -->
+<section>
+  <h2>Search on most Drupal sites</h2>
+  <div class="cols cols-2">
+    <div class="card">
+      <h3>Full page reload per facet</h3>
+      <p>Click a checkbox. Wait. Scroll back to where you were.</p>
+    </div>
+    <div class="card">
+      <h3>Views markup fights your theme</h3>
+      <p>Nested divs you didn't write, in places you can't reach.</p>
+    </div>
+    <div class="card">
+      <h3>Every project rebuilds it</h3>
+      <p>Same facets, same pager, same "no results" copy. From scratch.</p>
+    </div>
+    <div class="card">
+      <h3>Or you go headless</h3>
+      <p>And now you maintain a React app just for one page.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. STATEMENT ============ -->
+<section class="no-rule">
+  <p class="statement">There is a <span class="hl">third option</span>.</p>
+  <p class="statement" style="font-size:1em; margin-top:1em;">
+    Keep Drupal. Keep Search API.<br>Move only the <em>rendering</em> to the browser.
+  </p>
+</section>
+
+<!-- ============ 4. SEARCH API IN ONE SLIDE ============ -->
+<section>
+  <h2>Search API, in one slide</h2>
+  <div class="flow">
+    <div class="step"><b>Content</b><span>Nodes, media, files</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>Index</b><span>Which fields, which bundles</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>Server</b><span>Solr, database, Meilisearch</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>Query</b><span>Keywords, facets, sort</span></div>
+  </div>
+  <ul style="margin-top:1em; font-size:0.8em;">
+    <li>You already know this part. Nothing here changes.</li>
+    <li><strong>Backend-agnostic</strong> — swap Solr for the DB backend and the front end never notices.</li>
+    <li>Today's demo runs on <strong>Solr 9</strong> in DDEV.</li>
+  </ul>
+</section>
+
+<!-- ============ 5. THE MISSING PIECE ============ -->
+<section>
+  <h2>The missing piece: a JSON endpoint</h2>
+  <div class="cols cols-2">
+    <div class="card gold">
+      <h3>Search API Decoupled</h3>
+      <p>Turns an index into a configured, cacheable JSON endpoint.
+         You pick the fields, facets, and page size in the admin UI.</p>
+    </div>
+    <div class="card gold">
+      <h3>Not a generic API</h3>
+      <p>It is not JSON:API. It is one endpoint per search, shaped for
+         that search. Access checks still apply.</p>
+    </div>
+  </div>
+  <pre><code class="language-bash" data-trim>
+GET /api/search/books?q=sea&f[0]=subject:Fiction
+  </code></pre>
+  <p class="footnote">Contrib: <code>drupal/search_api_decoupled</code></p>
+</section>
+
+<!-- ============ 6. WHAT IS A WEB COMPONENT ============ -->
+<section>
+  <h2>What is a web component?</h2>
+  <p style="font-size:0.85em;">A custom HTML tag the browser understands natively. No framework. No build step.</p>
+  <pre><code class="language-html" data-trim>
+&lt;search-root url="/api/search/books"&gt;
+  &lt;search-input&gt;&lt;/search-input&gt;
+  &lt;facet-checkbox key="book_subject"&gt;&lt;/facet-checkbox&gt;
+  &lt;search-results&gt;&lt;/search-results&gt;
+  &lt;search-pager&gt;&lt;/search-pager&gt;
+&lt;/search-root&gt;
+  </code></pre>
+  <ul style="font-size:0.78em;">
+    <li>Works in <strong>any theme</strong>, any page, any Drupal version that ships them.</li>
+    <li>Three browser APIs: <em>custom elements</em>, <em>shadow DOM</em>, <em>templates</em>.</li>
+    <li>It's just HTML. A site builder can place these.</li>
+  </ul>
+</section>
+
+<!-- ============ 7. SEARCH WEB COMPONENTS ============ -->
+<section>
+  <h2>Search Web Components</h2>
+  <div class="cols cols-2">
+    <div class="card">
+      <h3>A contrib module</h3>
+      <p><code>drupal/search_web_components</code> — a library of ready-made
+         search tags, plus blocks and a layout builder integration.</p>
+    </div>
+    <div class="card">
+      <h3>Built with Lit</h3>
+      <p>Ships one bundled ES module. No npm needed on your site.</p>
+    </div>
+    <div class="card muted">
+      <h3>One shared context</h3>
+      <p><code>&lt;search-root&gt;</code> owns the query and the results.
+         Everything inside it listens.</p>
+    </div>
+    <div class="card muted">
+      <h3>URL is the state</h3>
+      <p>Back button works. Links are shareable. No extra work.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. HOW THE PIECES TALK ============ -->
+<section>
+  <h2>How the pieces talk</h2>
+  <div class="flow">
+    <div class="step"><b>User types</b><span>&lt;search-input&gt;</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>Root updates URL</b><span>&lt;search-root&gt;</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>Fetch JSON</b><span>Decoupled endpoint</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>Results published</b><span><code>swc-post-search</code></span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>Children re-render</b><span>Results, facets, pager</span></div>
+  </div>
+  <p style="margin-top:1.1em; font-size:0.8em;">
+    One loop. One event. Add a component by listening to the same event —
+    you never patch the ones that already exist.
+  </p>
+</section>
+
+<!-- ============ 9. YOUR OWN LAYER ============ -->
+<section>
+  <h2>Your own layer, if you need it</h2>
+  <p style="font-size:0.8em;">Contrib is the engine. When a project keeps asking for the same extras,
+  a small <em>custom module</em> on top can carry them. Anyone can build one.</p>
+  <div class="cols cols-2">
+    <div class="card">
+      <h3>Editor-friendly settings</h3>
+      <p>Placeholder text, button labels, "no results" copy, facet
+         labels &mdash; as config an editor changes in the UI.</p>
+    </div>
+    <div class="card">
+      <h3>Drupal blocks</h3>
+      <p>Wrap the tags you use most as blocks, so site builders place
+         search without touching Twig.</p>
+    </div>
+    <div class="card">
+      <h3>Enhancement JS</h3>
+      <p>Autocomplete, load more, keeping facets when the keyword
+         changes.</p>
+    </div>
+    <div class="card">
+      <h3>Twig-rendered results</h3>
+      <p>Render each result through a view mode, so designers stay
+         in Twig.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10. THE STACK ============ -->
+<section>
+  <h2>The whole stack</h2>
+  <table>
+    <tr><th>Layer</th><th>Module</th><th>Who owns it</th></tr>
+    <tr><td>Index &amp; query</td><td><code>search_api</code> (+ <code>search_api_solr</code>)</td><td>Contrib</td></tr>
+    <tr><td>JSON endpoint</td><td><code>search_api_decoupled</code></td><td>Contrib</td></tr>
+    <tr><td>Facets</td><td><code>facets</code></td><td>Contrib</td></tr>
+    <tr><td>Base components</td><td><code>search_web_components</code></td><td>Contrib</td></tr>
+    <tr><td>Site-specific UX</td><td>A custom module <em>(optional)</em></td><td>You</td></tr>
+    <tr><td>Look and feel</td><td>Your theme</td><td>You</td></tr>
+  </table>
+  <p class="footnote">Contrib is <code>composer require</code>. Your layers are ordinary Drupal code. Nothing is a patch.</p>
+</section>
+
+<!-- ============ 11. DEMO ============ -->
+<section class="center no-rule">
+  <p class="demo-badge">Live demo</p>
+  <h1 style="font-size:1.9em;">Let's look at it</h1>
+  <p class="byline">margin.ddev.site</p>
+</section>
+
+<!-- ============ 12. LIT ============ -->
+<section>
+  <h2>Why Lit?</h2>
+  <div class="cols cols-2">
+    <div class="card">
+      <h3>Tiny</h3>
+      <p>~5 KB. It is a helper on top of the browser, not a framework
+         that replaces it.</p>
+    </div>
+    <div class="card">
+      <h3>Reactive properties</h3>
+      <p>Change a property, the template re-renders. That's the whole API
+         you need on day one.</p>
+    </div>
+    <div class="card">
+      <h3>Real HTML templates</h3>
+      <p>Tagged template literals. No JSX, no compiler, no build step.</p>
+    </div>
+    <div class="card">
+      <h3>Standards, not lock-in</h3>
+      <p>The output is a plain custom element. Anything can consume it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 13. A LIT COMPONENT ============ -->
+<section>
+  <h2>A Lit component, whole</h2>
+  <pre><code class="language-javascript" data-trim data-line-numbers="1-4|6-9|11-16|18">
+import { LitElement, html } from 'lit';
+
+class ResultCount extends LitElement {
+  static properties = { total: { type: Number } };
+
+  render() {
+    return html`&lt;p&gt;${this.total} results&lt;/p&gt;`;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    document.addEventListener('swc-post-search', (e) =&gt; {
+      this.total = e.detail.context.response?.search_results_count ?? 0;
+    });
+  }
+}
+
+customElements.define('result-count', ResultCount);
+  </code></pre>
+  <p class="footnote">Now <code>&lt;result-count&gt;&lt;/result-count&gt;</code> works anywhere on the page.</p>
+</section>
+
+<!-- ============ 14. YOU DON'T ALWAYS NEED LIT ============ -->
+<section>
+  <h2>You don't always need Lit</h2>
+  <pre><code class="language-javascript" data-trim>
+class MarginResultCount extends HTMLElement {
+  connectedCallback() {
+    document.addEventListener('swc-post-search', () =&gt; this.update());
+  }
+
+  update() {
+    const response = document.querySelector('search-root')?.context?.response;
+    const total = response?.search_results_count ?? 0;
+    this.textContent = Drupal.formatPlural(total, '1 book', '@count books');
+  }
+}
+customElements.define('margin-result-count', MarginResultCount);
+  </code></pre>
+  <ul style="font-size:0.78em;">
+    <li>Plain <code>HTMLElement</code> — no dependency at all.</li>
+    <li>Good when the component has <strong>no reactive state</strong> worth tracking.</li>
+    <li>From this demo's own code, lightly trimmed. Nothing to build.</li>
+  </ul>
+</section>
+
+<!-- ============ 15. THREE WAYS TO CUSTOMIZE ============ -->
+<section>
+  <h2>Three ways to make it yours</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>1. Config</h3>
+      <p>Sorts, page sizes, layouts, and which element renders a result.
+         Set on the endpoint form and the blocks. No code.</p>
+    </div>
+    <div class="card gold">
+      <h3>2. Twig</h3>
+      <p>Replace a component's markup with your own template, in your
+         own theme. Same tag, your HTML.</p>
+    </div>
+    <div class="card muted">
+      <h3>3. A new component</h3>
+      <p>Extend an existing tag, or define a brand new one. Listen to
+         <code>swc-post-search</code>. Ship it in your own module.</p>
+    </div>
+  </div>
+  <p class="footnote">Ladder of effort. Start at 1. Most requests never get past 2.</p>
+</section>
+
+<!-- ============ 16. YOUR OWN RESULT CARD ============ -->
+<section>
+  <h2>Bring your own result card</h2>
+  <pre><code class="language-javascript" data-trim>
+// Endpoint form, Result elements: books render as &lt;margin-book-card&gt;
+class MarginBookCard extends HTMLElement {
+  set data(value) {   // SWC hands over the raw JSON row
+    this._data = value;
+    this.render();
+  }
+
+  render() {
+    const book = this._data;
+    this.innerHTML = `
+      &lt;article class="book-card"&gt;
+        &lt;h3&gt;${esc(first(book.title))}&lt;/h3&gt;
+        &lt;p&gt;${esc([].concat(book.author ?? []).join(', '))}&lt;/p&gt;
+      &lt;/article&gt;`;
+  }
+}
+customElements.define('margin-book-card', MarginBookCard);
+  </code></pre>
+  <p class="footnote">SWC owns the results list. Your element owns each result. No patch, no fork.</p>
+</section>
+
+<!-- ============ 17. HOOKS AND EVENTS ============ -->
+<section>
+  <h2>Seams you can use</h2>
+  <div class="cols cols-2">
+    <div class="card">
+      <h3>PHP</h3>
+      <p><code>hook_preprocess_block()</code> — change the props of a
+         placed SWC block. Relabel a sort, set screen reader text.</p>
+    </div>
+    <div class="card">
+      <h3>JS</h3>
+      <p><code>swc-post-search</code> — fires after every search
+         lands, Back button included. Bubbles and crosses shadow DOM. Analytics, counts,
+         scroll restore.</p>
+    </div>
+    <div class="card muted">
+      <h3>Twig</h3>
+      <p>A theme component with
+         <code>replaces: search_web_components:&lt;tag&gt;</code>
+         swaps the markup.</p>
+    </div>
+    <div class="card muted">
+      <h3>Subclass</h3>
+      <p>Extend any tag's class. For example, override
+         <code>search-root</code>'s announcement text for a language
+         with more plural forms.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 18. TRADE-OFFS ============ -->
+<section>
+  <h2>The honest trade-offs</h2>
+  <div class="cols cols-2">
+    <div class="card">
+      <h3>It needs JavaScript</h3>
+      <p>No JS, no results. Fine for a search page. Not fine if search
+         is your only navigation.</p>
+    </div>
+    <div class="card">
+      <h3>SEO</h3>
+      <p>Don't expect search result pages to be indexed. They shouldn't be
+         anyway — but know it going in.</p>
+    </div>
+    <div class="card">
+      <h3>Alpha upstream</h3>
+      <p><code>search_web_components</code> and <code>search_api_decoupled</code>
+         are alpha. You need <code>minimum-stability: alpha</code>.</p>
+    </div>
+    <div class="card">
+      <h3>Accessibility is on you</h3>
+      <p>Live regions, focus management, announcing result counts.
+         The tags don't do it for free.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 19. WHEN NOT TO ============ -->
+<section>
+  <h2>When to just use Views</h2>
+  <ul>
+    <li>A short list that rarely changes. <em>Views.</em></li>
+    <li>No facets, no keyword box. <em>Views.</em></li>
+    <li>Results must be crawlable. <em>Views.</em></li>
+    <li>Site has no search server and won't get one. <em>Views.</em></li>
+  </ul>
+  <p style="margin-top:1.2em;">
+    Reach for this stack when the page is <strong>interactive</strong>:
+    many facets, live keyword search, big result sets, load-more.
+  </p>
+</section>
+
+<!-- ============ 20. TAKEAWAYS ============ -->
+<section>
+  <h2>Take these home</h2>
+  <ul>
+    <li><strong>You can decouple one page</strong> without decoupling the site.</li>
+    <li><strong>Web components are just HTML tags</strong> — site builders can place them.</li>
+    <li><strong>Search API doesn't change.</strong> Only the rendering moves.</li>
+    <li><strong>Lit is small.</strong> Twenty lines is a real component.</li>
+    <li><strong>Subclass, don't patch.</strong> Custom elements make that easy.</li>
+    <li><strong>Twig is still available</strong> when the design demands it.</li>
+  </ul>
+</section>
+
+<!-- ============ 21. LINKS ============ -->
+<section>
+  <h2>Where to get it</h2>
+  <table>
+    <tr><th>Thing</th><th>Where</th></tr>
+    <tr><td>Search Web Components</td><td>drupal.org/project/search_web_components</td></tr>
+    <tr><td>Search API Decoupled</td><td>drupal.org/project/search_api_decoupled</td></tr>
+    <tr><td>Lit</td><td>lit.dev</td></tr>
+  </table>
+</section>
+
+<!-- ============ 22. THANKS ============ -->
+<section class="center no-rule">
+  <h1 style="font-size:2.2em;">Questions?</h1>
+  <p class="byline">Mark &middot; Affinity Bridge &middot; affinitybridge.com</p>
+</section>
+
+</div>
+</div>
+
+<script src="vendor/dist/reveal.js"></script>
+<script src="vendor/plugin/highlight/highlight.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'fade',
+    transitionSpeed: 'fast',
+    width: 1280,
+    height: 760,
+    margin: 0.08,
+    plugins: [RevealHighlight],
+  });
+</script>
+</body>
+</html>
