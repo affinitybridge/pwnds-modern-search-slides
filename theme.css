@@ -218,3 +218,7 @@ body,
   overflow-wrap: anywhere;
   font-size: 0.85em;
 }
+
+/* Short code listings that need to read from the back of a room. */
+.reveal pre.big-code { font-size: 1.2em; margin: 0.2em 0; }
+.reveal pre.big-code code { max-height: none; line-height: 1.2; padding: 0.5em 0.8em; }

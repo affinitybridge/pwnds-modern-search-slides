@@ -235,7 +235,7 @@ GET /api/search/books?q=sea&f[0]=subject:Fiction
 <!-- ============ 13. A LIT COMPONENT ============ -->
 <section>
   <h2>A Lit component, whole</h2>
-  <pre><code class="language-javascript" data-trim data-line-numbers="1-4|6-9|11-16|18">
+  <pre class="big-code"><code class="language-javascript" data-trim data-line-numbers="1-4|6-9|11-17|19">
 import { LitElement, html } from 'lit';
 
 class ResultCount extends LitElement {
@@ -248,7 +248,8 @@ class ResultCount extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener('swc-post-search', (e) =&gt; {
-      this.total = e.detail.context.response?.search_results_count ?? 0;
+      this.total =
+        e.detail.context.response?.search_results_count ?? 0;
     });
   }
 }
